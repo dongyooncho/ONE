@@ -36,7 +36,7 @@ public:
   virtual bool run(luci::Module *module) = 0;
 };
 
+
 } // namespace opselector
 
 #endif // __CIRCLE_OPSELECTOR_SELECT_PASS__
-

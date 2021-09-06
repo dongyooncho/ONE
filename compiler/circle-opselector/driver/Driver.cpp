@@ -39,22 +39,23 @@ void print_version(void)
 
 bool check_input(std::string str)
 {
-  bool check_hyphen;
+  bool check_hyphen = false;
 
-  for(char c : str)
+  for (char c : str)
   {
-    if('0'<= c && c<='9') continue;
-    else if(check_hyphen) // when user enter '-' more than 2.
+    if ('0' <= c && c <= '9')
+      continue;
+    else if (check_hyphen) // when user enter '-' more than 2.
     {
-	    std::cout << "Too many '-' in str." << std::endl;
+      std::cout << "Too many '-' in str." << std::endl;
       exit(0);
     }
-    else if('-') check_hyphen=true;
-    else if(',') continue;
+    else if (c == '-')
+      check_hyphen = true;
     else // when user enter not allowed character, print alert msg.
     {
       std::cout << "To select operator by id, please use these args: [0-9], '-', ','" << std::endl;
-      exit(0);      
+      exit(0);
     }
   }
   return true;
@@ -66,22 +67,22 @@ void split_id_input(const std::string &str, std::vector<int> &by_id)
   ss.str(str);
   std::string str_buf;
 
-  while(getline(ss, str_buf, ','))
+  while (getline(ss, str_buf, ','))
   {
-    if(check_input) // input validation
+    if (str_buf.length() && check_input(str_buf)) // input validation
     {
-      if(str_buf.find('-')==std::string::npos)  // if token has no '-'
+      if (str_buf.find('-') == std::string::npos) // if token has no '-'
         by_id.push_back(stoi(str_buf));
       else // tokenize again by '-'
       {
         std::istringstream ss2(str_buf);
         std::string token;
-        int from_to[2], top=0;
+        int from_to[2], top = 0;
 
-        while(getline(ss2, token, '-'))
-          from_to[top++]=stoi(token);
+        while (getline(ss2, token, '-'))
+          from_to[top++] = stoi(token);
 
-        for(int number = from_to[0]; number <= from_to[1]; number++)
+        for (int number = from_to[0]; number <= from_to[1]; number++)
           by_id.push_back(number);
       }
     }
@@ -94,7 +95,7 @@ void split_name_input(const std::string &str, std::vector<std::string> &by_name)
   ss.str(str);
   std::string str_buf;
 
-  while(getline(ss, str_buf, ','))
+  while (getline(ss, str_buf, ','))
     by_name.push_back(str_buf);
 }
 
@@ -112,7 +113,7 @@ int entry(int argc, char **argv)
     .exit_with(print_version);
 
   // TODO Add new options!
-  
+
   arser.add_argument("--input").nargs(1).type(arser::DataType::STR).help("Input circle model");
   arser.add_argument("--output").nargs(1).type(arser::DataType::STR).help("Output circle model");
 
@@ -145,23 +146,23 @@ int entry(int argc, char **argv)
   std::vector<int> by_id;
   std::vector<std::string> by_name;
 
-  if(arser["--by_id"])
+  if (arser["--by_id"])
   {
-    operator_input=arser.get<std::string>("--by_id");
+    operator_input = arser.get<std::string>("--by_id");
     split_id_input(operator_input, by_id);
   }
-  if(arser["--by_name"])
+  if (arser["--by_name"])
   {
-    operator_input=arser.get<std::string>("--by_name");
+    operator_input = arser.get<std::string>("--by_name");
     split_name_input(operator_input, by_name);
   }
 
   // option parsing test code.
-  for(int x: by_id)
-    std::cout<<"by_id: "<< x << std::endl;
+  for (int x : by_id)
+    std::cout << "by_id: " << x << std::endl;
 
-  for(std::string line: by_name)
-    std::cout<<"by_name: "<<line<<std::endl;
+  for (std::string line : by_name)
+    std::cout << "by_name: " << line << std::endl;
 
   // Load model from the file
   foder::FileLoader file_loader{input_path};
@@ -193,18 +194,16 @@ int entry(int argc, char **argv)
   passes.emplace_back(std::make_unique<opselector::Function1>());
 
   // Add pass later
-  if(by_id.size())
+  if (by_id.size())
   {
-      
   }
-  if(by_name.size())
+  if (by_name.size())
   {
-      
   }
   // Run for each passes
   for (auto &pass : passes)
   {
-    std::cout<<pass->run(module.get())<<std::endl;
+    std::cout << pass->run(module.get()) << std::endl;
   }
 
   // Export to output Circle file

@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "Function1.h"
 
 namespace opselector
 {
-    bool Function1::run(luci::Module* module)
-    {
-        return false;
-    }
-}
-
+  bool Function1::run(luci::Module* module) { return false; }
+} // namespace opselector
