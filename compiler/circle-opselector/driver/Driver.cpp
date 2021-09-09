@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#include "SinglePass.h"
-#include "Function1.h"
+#include "OpSelector.h"
 // TODO Add new pass headers
 
 #include <foder/FileLoader.h>
@@ -187,23 +186,36 @@ int entry(int argc, char **argv)
   luci::Importer importer;
   auto module = importer.importModule(circle_model);
 
-  // Enable each pass
-  std::vector<std::unique_ptr<opselector::SinglePass>> passes;
-
-  // TODO Add new passes!
-  passes.emplace_back(std::make_unique<opselector::Function1>());
-
-  // Add pass later
+  // TODO Add function
   if (by_id.size())
   {
+    std::cout<<"input: "<<module.get()->graph()->inputs()->at(0)->name()<<std::endl;
+    std::cout<<"module.size(number of subgraph): "<<module.get()->size()<<std::endl;
+    std::cout<<"module.graph.nodes.size(number of operator): "<<module.get()->graph()->nodes()->size()<<std::endl;
+    std::map<uint32_t, std::string> _source_table = module.get()->source_table();
+    /*std::cout<<"map Content::"<<std::endl;
+    for(int i=2; i<8; i++)
+    {
+      _source_table.erase(i);
+    }
+    module.get()->source_table(_source_table);
+     _source_table=module.get()->source_table();*/
+    for(auto iter=_source_table.begin();iter!=_source_table.end();iter++)
+      std::cout<<iter->first<<" "<<iter->second<<std::endl;
   }
   if (by_name.size())
   {
-  }
-  // Run for each passes
-  for (auto &pass : passes)
-  {
-    std::cout << pass->run(module.get()) << std::endl;
+    opselector::OpSelector *selector = new opselector::OpSelector();
+    std::map<uint32_t, std::string> _source_table = module.get()->source_table();
+    std::vector<std::string> named_output;
+    for(auto name : by_name) // find
+    {
+      for(auto iter=_source_table.begin();iter!=_source_table.end();iter++)
+        if(iter->second.find(name)!= std::string::npos)
+            named_output.push_back(iter->second);
+    }
+    
+    selector->select_nodes_by_name(module.get(), named_output);
   }
 
   // Export to output Circle file
